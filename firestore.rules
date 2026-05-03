@@ -56,10 +56,9 @@ service cloud.firestore {
     // --- Rules ---
 
     // Public Read Access for landing page data
-    match /profile/{profileId} {
-      allow get, list: if true;
-      allow create, update: if isAdmin() && isValidProfile(request.resource.data);
-      allow delete: if isAdmin();
+    match /settings/profile {
+      allow read: if true;
+      allow write: if isAdmin() && isValidProfile(request.resource.data);
     }
 
     match /projects/{projectId} {

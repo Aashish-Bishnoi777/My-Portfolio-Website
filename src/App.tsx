@@ -4,16 +4,21 @@ import {
   Menu, X, Linkedin, Instagram,
   ExternalLink, Mail, BarChart,
   Send, Edit2, Palette, Zap, Brush, Video,
-  Sun, Moon, Sparkles, Award, Briefcase, Lightbulb, Loader2
+  Sun, Moon, Sparkles, Award, Briefcase, Lightbulb, Loader2, LogIn, LogOut, Plus, User
 } from 'lucide-react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { auth, signInWithGoogle, logout, db } from './lib/firebase';
+import { useProfile, useProjects, useAchievements, useIsAdmin } from './lib/hooks/useFirestore';
+import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+import { handleFirestoreError, OperationType } from './lib/errorHandlers';
+import AdminPanel from './components/AdminPanel';
 import { cn } from './lib/utils';
 import { Profile } from './types';
 import ResumeBuilder from './components/ResumeBuilder';
 
 // --- Components ---
 
-function Navbar({ theme, setTheme }: any) {
+function Navbar({ user, isAdmin, onLogin, onLogout, theme, setTheme }: any) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { pathname } = useLocation();
@@ -101,6 +106,34 @@ function Navbar({ theme, setTheme }: any) {
           ))}
           
           <ThemeToggle />
+
+          {user ? (
+            <div className="flex items-center gap-4">
+              {isAdmin && (
+                <Link to="/admin" className={cn(
+                  "text-xs px-2 py-1 rounded border transition-all shadow-sm",
+                  pathname === '/admin' ? "bg-brand text-black border-brand" : "bg-brand/10 text-brand border-brand/20"
+                )}>
+                  Admin Panel
+                </Link>
+              )}
+              <button 
+                onClick={onLogout} 
+                className="text-text-body hover:text-text-title p-2 hover:bg-bg-surface rounded-full transition-all"
+                title="Logout"
+              >
+                <LogOut size={18} />
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={onLogin} 
+              className="flex items-center gap-2 px-5 py-2 bg-brand text-white dark:text-black rounded-full font-bold text-sm hover:opacity-80 transition-all transform hover:scale-105 shadow-lg shadow-brand/20"
+            >
+              <LogIn size={16} />
+              <span>Sign In</span>
+            </button>
+          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -124,6 +157,21 @@ function Navbar({ theme, setTheme }: any) {
             {navLinks.map((link) => (
               <NavItem key={link.name} link={link} />
             ))}
+            {user ? (
+              <div className="flex flex-col gap-4 pt-4 border-t border-border-main">
+                {isAdmin && <Link to="/admin" className="text-brand font-bold" onClick={() => setMobileMenuOpen(false)}>Admin Panel</Link>}
+                <button onClick={() => { onLogout(); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-text-body font-medium">
+                  <LogOut size={18} /> Logout
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={onLogin} 
+                className="flex items-center justify-center gap-2 w-full py-4 bg-brand text-white dark:text-black font-bold rounded-xl mt-4"
+              >
+                <LogIn size={18} /> Sign In
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -131,7 +179,7 @@ function Navbar({ theme, setTheme }: any) {
   );
 }
 
-function HomePage() {
+function HomePage({ profile: liveProfile, projects: liveProjects, achievements: liveAchievements, isAdmin }: any) {
   const providedProjects = [
     {
       id: 'p1',
@@ -191,17 +239,9 @@ function HomePage() {
     }
   ];
 
-  const achievements = [
-    {
-      id: 'a1',
-      title: "Digital Marketing Certification",
-      date: "2024",
-      description: "Completed an intensive program focusing on SEO, SEM, and Content Strategy.",
-      imageUrl: "/images/regenerated_image_1777799992473.jpg"
-    }
-  ];
+  const allProjects = [...providedProjects, ...liveProjects];
 
-  const profile = {
+  const profile = liveProfile || {
     name: "Aashish Bishnoi",
     tagline: "Crafting digital experiences through SEO, content strategy, and data-driven marketing. Student at Geeta University, Panipat.",
     about: "I am Aashish Bishnoi, a dedicated Digital Marketing student at Geeta University with a passion for understanding the interplay between technology and consumer behavior.",
@@ -210,7 +250,15 @@ function HomePage() {
     profileImage: "/images/regenerated_image_1777735650304.jpg"
   };
 
-  const allProjects = providedProjects;
+  const achievements = liveAchievements.length > 0 ? liveAchievements : [
+    {
+      id: 'a1',
+      title: "Digital Marketing Certification",
+      date: "2024",
+      description: "Completed an intensive program focusing on SEO, SEM, and Content Strategy.",
+      imageUrl: "/images/regenerated_image_1777799992473.jpg"
+    }
+  ];
 
   const skills = [
     { name: "Traditional Arts", icon: Brush, level: 85 },
@@ -328,6 +376,13 @@ function HomePage() {
             </div>
           )}
         </div>
+        {isAdmin && (
+           <div className="mt-12 flex justify-center">
+             <Link to="/admin" className="flex items-center gap-2 px-6 py-3 bg-brand text-black rounded-full hover:opacity-80 transition-all font-semibold shadow-lg shadow-brand/20">
+               <Plus size={20} /> Add New Project
+             </Link>
+           </div>
+        )}
       </Section>
 
       <Section id="achievements" title="Achievements" className="scroll-mt-20">
@@ -417,14 +472,21 @@ function ContactForm() {
     e.preventDefault();
     setIsSubmitting(true);
     setSuccess(false);
-    
-    // Simulate API call
-    setTimeout(() => {
+    const path = 'messages';
+    try {
+      await addDoc(collection(db, path), {
+        ...formData,
+        createdAt: serverTimestamp()
+      });
       setSuccess(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
-      setIsSubmitting(false);
       setTimeout(() => setSuccess(false), 5000);
-    }, 1000);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, path);
+      alert("Something went wrong. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -480,25 +542,80 @@ function ContactForm() {
 // --- App Root ---
 
 export default function App() {
+  const [user, setUser] = useState<any>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('theme');
     return (saved && saved !== 'soft') ? saved : 'dark';
   });
+
+  const { profile, loading: profileLoading } = useProfile();
+  const { projects, loading: projectsLoading } = useProjects();
+  const { achievements, loading: achievementsLoading } = useAchievements();
+  const { isAdmin } = useIsAdmin();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  useEffect(() => {
+    return auth.onAuthStateChanged(u => {
+      setUser(u);
+      setAuthChecked(true);
+      if (u) {
+        bootstrapAdmin(u.uid, u.email!);
+      }
+    });
+  }, []);
+
+  const bootstrapAdmin = async (uid: string, email: string) => {
+    if (email === 'ashishgill2929@gmail.com') {
+      try {
+        await setDoc(doc(db, 'admins', uid), { email }, { merge: true });
+      } catch (e) {
+        // Silently fail if rules prevent it or already exists
+      }
+    }
+  };
+
+  const handleLogin = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error: any) {
+      if (error?.code === 'auth/popup-closed-by-user') {
+        console.log("Sign-in popup closed by user.");
+        return;
+      }
+      console.error("Login failed", error);
+      alert("Sign-in failed: " + (error?.message || "Unknown error"));
+    }
+  };
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-bg-base flex items-center justify-center">
+        <Loader2 className="text-brand animate-spin" size={48} />
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-bg-base text-text-body font-sans selection:bg-brand selection:text-black overflow-x-hidden">
-        <Navbar theme={theme} setTheme={setTheme} />
+        <Navbar user={user} isAdmin={isAdmin} onLogin={handleLogin} onLogout={logout} theme={theme} setTheme={setTheme} />
         
         <main>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomePage profile={profile} projects={projects} achievements={achievements} isAdmin={isAdmin} />} />
             <Route path="/resume" element={<ResumeBuilder />} />
+            <Route path="/admin" element={isAdmin ? <AdminPanel /> : (
+              <div className="pt-32 text-center h-screen flex flex-col items-center justify-center">
+                <h1 className="text-4xl font-bold text-text-title mb-4">Unauthorized</h1>
+                <p className="text-text-body mb-8">You need admin privileges to access this page.</p>
+                <Link to="/" className="text-brand font-bold underline decoration-brand/30">Go Back Home</Link>
+              </div>
+            )} />
           </Routes>
         </main>
 

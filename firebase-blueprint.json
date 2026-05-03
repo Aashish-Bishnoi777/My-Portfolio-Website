@@ -67,9 +67,9 @@
     }
   },
   "firestore": {
-    "profile": {
+    "settings/profile": {
       "schema": "Profile",
-      "description": "Collection containing the single profile document."
+      "description": "The site-wide profile configuration."
     },
     "projects": {
       "schema": "Project",

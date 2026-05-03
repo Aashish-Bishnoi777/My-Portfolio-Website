@@ -2,10 +2,14 @@ import { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { Download, Loader2, User, Mail, Link as LinkIcon, MapPin } from 'lucide-react';
+import { useProfile, useProjects } from '../lib/hooks/useFirestore';
 import { cn } from '../lib/utils';
 
 export default function ResumeBuilder() {
-  const profile = {
+  const { profile: liveProfile } = useProfile();
+  const { projects: liveProjects } = useProjects();
+
+  const profile = liveProfile || {
     name: "Aashish Bishnoi",
     title: "Digital Marketing Enthusiast",
     about: "Highly motivated digital marketer with a focus on data-driven results. Experienced in SEO strategies, social media optimization, and building cohesive brand narratives.",
@@ -25,7 +29,7 @@ export default function ResumeBuilder() {
     }
   };
 
-  const projects = [
+  const projects = liveProjects.length > 0 ? liveProjects : [
     {
       id: 'p1',
       title: "Skills for 2030 Infographic",
