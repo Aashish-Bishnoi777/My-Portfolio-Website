@@ -16,6 +16,9 @@ import { collection, doc, setDoc, getDocs, addDoc, serverTimestamp } from 'fireb
 import { handleFirestoreError, OperationType } from './lib/errorHandlers';
 import AdminPanel from './components/AdminPanel';
 import ResumeBuilder from './components/ResumeBuilder';
+import { 
+  profileImage, p1, p2, p3, p4, p5, p6, p7, p8 
+} from './assets/images';
 
 // --- Components ---
 
@@ -182,56 +185,56 @@ function HomePage({ profile, projects, achievements, isAdmin }: any) {
       id: 'p1',
       title: "Skills for 2030 Infographic",
       description: "A comprehensive visual guide exploring the future-proof skills required in a rapidly changing digital landscape, focusing on AI literacy and adaptability.",
-      imageUrl: "/images/regenerated_image_1777799992473.jpg",
+      imageUrl: p1,
       tools: ["Digital Strategy", "Visual Storytelling", "Content Marketing"],
     },
     {
       id: 'p2',
       title: "A Day in Life with AI",
       description: "An educational infographic showcasing the practical applications of AI in daily routines, from morning productivity to nightly entertainment.",
-      imageUrl: "/images/regenerated_image_1777799994305.jpg",
+      imageUrl: p2,
       tools: ["AI Literacy", "Educational Content", "Information Design"],
     },
     {
       id: 'p3',
       title: "The Bound Heart",
       description: "A surreal representation of a heart bound by chains and blossoming with flowers, symbolizing the complex relationship between strength and vulnerability.",
-      imageUrl: "/images/regenerated_image_1777799996377.jpg",
+      imageUrl: p3,
       tools: ["Surrealism", "Inking", "Symbolism"],
     },
     {
       id: 'p4',
       title: "Faithful Companion",
       description: "A detailed pencil sketch of a Golden Retriever, capturing the warmth and loyalty of man's best friend through intricate shading.",
-      imageUrl: "/images/regenerated_image_1777799997842.jpg",
+      imageUrl: p4,
       tools: ["Traditional Art", "Pencil Sketching", "Realism"],
     },
     {
       id: 'p5',
       title: "Vintage Chardonnay",
       description: "A still-life study of a wine bottle and glass, exploring light reflection, transparency, and the delicate balance of composition.",
-      imageUrl: "/images/regenerated_image_1777799999418.jpg",
+      imageUrl: p5,
       tools: ["Still Life", "Shading", "Composition"],
     },
     {
       id: 'p6',
       title: "Infernal Skull",
       description: "A bold, high-contrast dark art sketch featuring a stylized skull with flame-like elements.",
-      imageUrl: "/images/regenerated_image_1777800000951.jpg",
+      imageUrl: p6,
       tools: ["Dark Art", "Detailing", "Concept"],
     },
     {
       id: 'p7',
       title: "Precision & Power",
       description: "A technical pencil drawing of a semi-automatic handgun, focusing on mechanical accuracy and industrial textures.",
-      imageUrl: "/images/regenerated_image_1777800002455.jpg",
+      imageUrl: p7,
       tools: ["Technical Drawing", "Contrast", "Industrial Art"],
     },
     {
       id: 'p8',
       title: "Crystal Wolf",
       description: "A stunning concept piece blending raw nature with geometric crystal structures and dual-colored eyes.",
-      imageUrl: "/images/regenerated_image_1777800003871.jpg",
+      imageUrl: p8,
       tools: ["Concept Art", "Hybrid Work", "Creativity"],
     }
   ];
@@ -692,9 +695,9 @@ function Hero({ profile }: { profile: Profile | null }) {
           className="relative lg:block"
         >
           <div className="aspect-square rounded-3xl overflow-hidden border border-border-main bg-bg-surface relative group max-w-md mx-auto md:max-w-none">
-            {profile?.profileImage || "/images/regenerated_image_1777735650304.jpg" ? (
+            {profile?.profileImage || profileImage ? (
               <img 
-                src={profile?.profileImage || "/images/regenerated_image_1777735650304.jpg"} 
+                src={profile?.profileImage || profileImage} 
                 alt={profile?.name || "Aashish Bishnoi"} 
                 className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" 
                 onError={(e) => {
