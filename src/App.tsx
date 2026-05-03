@@ -182,56 +182,56 @@ function HomePage({ profile, projects, achievements, isAdmin }: any) {
       id: 'p1',
       title: "Skills for 2030 Infographic",
       description: "A comprehensive visual guide exploring the future-proof skills required in a rapidly changing digital landscape, focusing on AI literacy and adaptability.",
-      imageUrl: "/src/assets/images/regenerated_image_1777799992473.jpg",
+      imageUrl: "/images/regenerated_image_1777799992473.jpg",
       tools: ["Digital Strategy", "Visual Storytelling", "Content Marketing"],
     },
     {
       id: 'p2',
       title: "A Day in Life with AI",
       description: "An educational infographic showcasing the practical applications of AI in daily routines, from morning productivity to nightly entertainment.",
-      imageUrl: "/src/assets/images/regenerated_image_1777799994305.jpg",
+      imageUrl: "/images/regenerated_image_1777799994305.jpg",
       tools: ["AI Literacy", "Educational Content", "Information Design"],
     },
     {
       id: 'p3',
       title: "The Bound Heart",
       description: "A surreal representation of a heart bound by chains and blossoming with flowers, symbolizing the complex relationship between strength and vulnerability.",
-      imageUrl: "/src/assets/images/regenerated_image_1777799996377.jpg",
+      imageUrl: "/images/regenerated_image_1777799996377.jpg",
       tools: ["Surrealism", "Inking", "Symbolism"],
     },
     {
       id: 'p4',
       title: "Faithful Companion",
       description: "A detailed pencil sketch of a Golden Retriever, capturing the warmth and loyalty of man's best friend through intricate shading.",
-      imageUrl: "/src/assets/images/regenerated_image_1777799997842.jpg",
+      imageUrl: "/images/regenerated_image_1777799997842.jpg",
       tools: ["Traditional Art", "Pencil Sketching", "Realism"],
     },
     {
       id: 'p5',
       title: "Vintage Chardonnay",
       description: "A still-life study of a wine bottle and glass, exploring light reflection, transparency, and the delicate balance of composition.",
-      imageUrl: "/src/assets/images/regenerated_image_1777799999418.jpg",
+      imageUrl: "/images/regenerated_image_1777799999418.jpg",
       tools: ["Still Life", "Shading", "Composition"],
     },
     {
       id: 'p6',
       title: "Infernal Skull",
       description: "A bold, high-contrast dark art sketch featuring a stylized skull with flame-like elements.",
-      imageUrl: "/src/assets/images/regenerated_image_1777800000951.jpg",
+      imageUrl: "/images/regenerated_image_1777800000951.jpg",
       tools: ["Dark Art", "Detailing", "Concept"],
     },
     {
       id: 'p7',
       title: "Precision & Power",
       description: "A technical pencil drawing of a semi-automatic handgun, focusing on mechanical accuracy and industrial textures.",
-      imageUrl: "/src/assets/images/regenerated_image_1777800002455.jpg",
+      imageUrl: "/images/regenerated_image_1777800002455.jpg",
       tools: ["Technical Drawing", "Contrast", "Industrial Art"],
     },
     {
       id: 'p8',
       title: "Crystal Wolf",
       description: "A stunning concept piece blending raw nature with geometric crystal structures and dual-colored eyes.",
-      imageUrl: "/src/assets/images/regenerated_image_1777800003871.jpg",
+      imageUrl: "/images/regenerated_image_1777800003871.jpg",
       tools: ["Concept Art", "Hybrid Work", "Creativity"],
     }
   ];
@@ -692,9 +692,9 @@ function Hero({ profile }: { profile: Profile | null }) {
           className="relative lg:block"
         >
           <div className="aspect-square rounded-3xl overflow-hidden border border-border-main bg-bg-surface relative group max-w-md mx-auto md:max-w-none">
-            {profile?.profileImage || "/src/assets/images/regenerated_image_1777735650304.jpg" ? (
+            {profile?.profileImage || "/images/regenerated_image_1777735650304.jpg" ? (
               <img 
-                src={profile?.profileImage || "/src/assets/images/regenerated_image_1777735650304.jpg"} 
+                src={profile?.profileImage || "/images/regenerated_image_1777735650304.jpg"} 
                 alt={profile?.name || "Aashish Bishnoi"} 
                 className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700" 
                 onError={(e) => {
