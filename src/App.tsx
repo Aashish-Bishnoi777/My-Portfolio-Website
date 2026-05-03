@@ -1,25 +1,19 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Menu, X, Github, Linkedin, Instagram, Twitter, 
-  ExternalLink, Mail, Code, BarChart, Search, 
-  Send, Plus, Trash2, Edit2, Download, LogIn, LogOut,
-  Award, Briefcase, User, Lightbulb, Loader2, Palette, Zap, Brush, Video,
-  Sun, Moon, Sparkles
+  Menu, X, Linkedin, Instagram,
+  ExternalLink, Mail, BarChart,
+  Send, Edit2, Palette, Zap, Brush, Video,
+  Sun, Moon, Sparkles, Award, Briefcase, Lightbulb, Loader2
 } from 'lucide-react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { auth, signInWithGoogle, logout, db } from './lib/firebase';
-import { useProfile, useProjects, useAchievements, useIsAdmin } from './lib/hooks/useFirestore';
 import { cn } from './lib/utils';
 import { Profile } from './types';
-import { collection, doc, setDoc, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
-import { handleFirestoreError, OperationType } from './lib/errorHandlers';
-import AdminPanel from './components/AdminPanel';
 import ResumeBuilder from './components/ResumeBuilder';
 
 // --- Components ---
 
-function Navbar({ user, isAdmin, onLogin, onLogout, theme, setTheme }: any) {
+function Navbar({ theme, setTheme }: any) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { pathname } = useLocation();
@@ -107,30 +101,6 @@ function Navbar({ user, isAdmin, onLogin, onLogout, theme, setTheme }: any) {
           ))}
           
           <ThemeToggle />
-
-          {user ? (
-            <div className="flex items-center gap-4">
-              {isAdmin && (
-                <Link to="/admin" className={cn(
-                  "text-xs px-2 py-1 rounded border transition-all",
-                  pathname === '/admin' ? "bg-brand text-black border-brand" : "bg-brand/10 text-brand border-brand/20"
-                )}>
-                  Admin
-                </Link>
-              )}
-              <button onClick={onLogout} className="text-text-body hover:text-text-title">
-                <LogOut size={18} />
-              </button>
-            </div>
-          ) : (
-            <button 
-              onClick={onLogin} 
-              className="flex items-center gap-2 px-5 py-2 bg-brand text-white dark:text-black rounded-full font-bold text-sm hover:opacity-80 transition-all transform hover:scale-105"
-            >
-              <LogIn size={16} />
-              <span>Sign In</span>
-            </button>
-          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -154,21 +124,6 @@ function Navbar({ user, isAdmin, onLogin, onLogout, theme, setTheme }: any) {
             {navLinks.map((link) => (
               <NavItem key={link.name} link={link} />
             ))}
-            {user ? (
-              <div className="flex flex-col gap-4 pt-4 border-t border-border-main">
-                {isAdmin && <Link to="/admin" className="text-brand font-medium" onClick={() => setMobileMenuOpen(false)}>Admin Panel</Link>}
-                <button onClick={() => { onLogout(); setMobileMenuOpen(false); }} className="flex items-center gap-2 text-text-body">
-                  <LogOut size={18} /> Logout
-                </button>
-              </div>
-            ) : (
-              <button 
-                onClick={onLogin} 
-                className="flex items-center justify-center gap-2 w-full py-4 bg-brand text-white dark:text-black font-bold rounded-xl mt-4"
-              >
-                <LogIn size={18} /> Sign In
-              </button>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -176,7 +131,7 @@ function Navbar({ user, isAdmin, onLogin, onLogout, theme, setTheme }: any) {
   );
 }
 
-function HomePage({ profile, projects, achievements, isAdmin }: any) {
+function HomePage() {
   const providedProjects = [
     {
       id: 'p1',
@@ -236,7 +191,26 @@ function HomePage({ profile, projects, achievements, isAdmin }: any) {
     }
   ];
 
-  const allProjects = [...providedProjects, ...projects];
+  const achievements = [
+    {
+      id: 'a1',
+      title: "Digital Marketing Certification",
+      date: "2024",
+      description: "Completed an intensive program focusing on SEO, SEM, and Content Strategy.",
+      imageUrl: "/images/regenerated_image_1777799992473.jpg"
+    }
+  ];
+
+  const profile = {
+    name: "Aashish Bishnoi",
+    tagline: "Crafting digital experiences through SEO, content strategy, and data-driven marketing. Student at Geeta University, Panipat.",
+    about: "I am Aashish Bishnoi, a dedicated Digital Marketing student at Geeta University with a passion for understanding the interplay between technology and consumer behavior.",
+    careerGoals: "My goal is to leverage data insights and creative storytelling to help brands build meaningful connections with their audiences in the digital space.",
+    university: "Geeta University, Panipat",
+    profileImage: "/images/regenerated_image_1777735650304.jpg"
+  };
+
+  const allProjects = providedProjects;
 
   const skills = [
     { name: "Traditional Arts", icon: Brush, level: 85 },
@@ -354,13 +328,6 @@ function HomePage({ profile, projects, achievements, isAdmin }: any) {
             </div>
           )}
         </div>
-        {isAdmin && (
-           <div className="mt-12 flex justify-center">
-             <Link to="/admin" className="flex items-center gap-2 px-6 py-3 bg-brand text-black rounded-full hover:opacity-80 transition-all font-semibold">
-               <Plus size={20} /> Manage Content
-             </Link>
-           </div>
-        )}
       </Section>
 
       <Section id="achievements" title="Achievements" className="scroll-mt-20">
@@ -450,21 +417,14 @@ function ContactForm() {
     e.preventDefault();
     setIsSubmitting(true);
     setSuccess(false);
-    const path = 'messages';
-    try {
-      await addDoc(collection(db, path), {
-        ...formData,
-        createdAt: serverTimestamp()
-      });
+    
+    // Simulate API call
+    setTimeout(() => {
       setSuccess(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setSuccess(false), 5000);
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, path);
-      alert("Something went wrong. Please try again later.");
-    } finally {
       setIsSubmitting(false);
-    }
+      setTimeout(() => setSuccess(false), 5000);
+    }, 1000);
   };
 
   return (
@@ -520,81 +480,25 @@ function ContactForm() {
 // --- App Root ---
 
 export default function App() {
-  const [user, setUser] = useState<any>(null);
-  const [authChecked, setAuthChecked] = useState(false);
   const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('theme');
     return (saved && saved !== 'soft') ? saved : 'dark';
   });
-  const { profile } = useProfile();
-  const { projects } = useProjects();
-  const { achievements } = useAchievements();
-  const { isAdmin } = useIsAdmin();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  useEffect(() => {
-    return auth.onAuthStateChanged(u => {
-      setUser(u);
-      setAuthChecked(true);
-      
-      // Bootstrap first admin if none exists
-      if (u) {
-        bootstrapAdmin(u.uid, u.email!);
-      }
-    });
-  }, []);
-
-  const bootstrapAdmin = async (uid: string, email: string) => {
-    // Only attempt to bootstrap if the specific admin email matches our master email
-    if (email === 'ashishgill2929@gmail.com') {
-      try {
-        await setDoc(doc(db, 'admins', uid), { email }, { merge: true });
-      } catch (e) {
-        // This will fail if the rule above is not met (email mismatch or not verified)
-        // or if it was already created.
-      }
-    }
-  };
-
-  const handleLogin = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error: any) {
-      if (error?.code === 'auth/popup-closed-by-user') {
-        console.log("Sign-in popup closed by user.");
-        return;
-      }
-      console.error("Login failed", error);
-      alert("Sign-in failed: " + (error?.message || "Unknown error"));
-    }
-  };
-
-  if (!authChecked) {
-    return (
-      <div className="min-h-screen bg-bg-base flex items-center justify-center">
-        <Loader2 className="text-brand animate-spin" size={48} />
-      </div>
-    );
-  }
-
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-bg-base text-text-body font-sans selection:bg-brand selection:text-black overflow-x-hidden">
-        <Navbar user={user} isAdmin={isAdmin} onLogin={handleLogin} onLogout={logout} theme={theme} setTheme={setTheme} />
+        <Navbar theme={theme} setTheme={setTheme} />
         
         <main>
           <Routes>
-            <Route path="/" element={<HomePage profile={profile} projects={projects} achievements={achievements} isAdmin={isAdmin} />} />
+            <Route path="/" element={<HomePage />} />
             <Route path="/resume" element={<ResumeBuilder />} />
-            <Route path="/admin" element={isAdmin ? <AdminPanel /> : <div className="pt-32 text-center h-screen flex flex-col items-center justify-center">
-              <h1 className="text-4xl font-bold text-text-title mb-4">Unauthorized</h1>
-              <p className="text-text-body mb-8">You need admin privileges to access this page.</p>
-              <Link to="/" className="text-brand font-bold underline">Go Back Home</Link>
-            </div>} />
           </Routes>
         </main>
 

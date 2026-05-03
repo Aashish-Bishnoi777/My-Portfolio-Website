@@ -1,13 +1,51 @@
 import { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import { useProfile, useProjects } from '../lib/hooks/useFirestore';
 import { Download, Loader2, User, Mail, Link as LinkIcon, MapPin } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export default function ResumeBuilder() {
-  const { profile } = useProfile();
-  const { projects } = useProjects();
+  const profile = {
+    name: "Aashish Bishnoi",
+    title: "Digital Marketing Enthusiast",
+    about: "Highly motivated digital marketer with a focus on data-driven results. Experienced in SEO strategies, social media optimization, and building cohesive brand narratives.",
+    careerGoals: "Aiming to contribute to forward-thinking digital agencies and help brands scale their presence globally.",
+    university: "Geeta University, Panipat",
+    skills: [
+      { name: "Traditional Arts" },
+      { name: "Graphic Designing" },
+      { name: "Logo Design" },
+      { name: "Google Ads" },
+      { name: "Video Editing" },
+      { name: "Social Media Marketing" }
+    ],
+    socialLinks: {
+      linkedin: "linkedin.com/in/aashish-bishnoi-30b337382",
+      instagram: "@silent_tales_official"
+    }
+  };
+
+  const projects = [
+    {
+      id: 'p1',
+      title: "Skills for 2030 Infographic",
+      description: "A comprehensive visual guide exploring the future-proof skills required in a rapidly changing digital landscape.",
+      tools: ["Digital Strategy", "Visual Storytelling", "Content Marketing"],
+    },
+    {
+      id: 'p2',
+      title: "A Day in Life with AI",
+      description: "An educational infographic showcasing the practical applications of AI in daily routines.",
+      tools: ["AI Literacy", "Educational Content", "Information Design"],
+    },
+    {
+      id: 'p3',
+      title: "The Bound Heart",
+      description: "A surreal representation of a heart bound by chains and blossoming with flowers.",
+      tools: ["Surrealism", "Inking", "Symbolism"],
+    }
+  ];
+
   const [exporting, setExporting] = useState(false);
   const resumeRef = useRef<HTMLDivElement>(null);
 
@@ -165,7 +203,7 @@ export default function ResumeBuilder() {
                  <input type="checkbox" checked readOnly className="accent-brand" />
                </div>
                <div className="p-4 bg-brand/10 border border-brand/20 rounded-xl text-xs text-brand leading-relaxed">
-                 Tip: Update your profile in the Admin dashboard to reflect changes here.
+                 Tip: Use a modern browser for the best export quality.
                </div>
             </div>
           </div>
