@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Validation Blueprints ---
+
+    function isValidProfile(data) {
+      return data.keys().hasAll(['name', 'title']) &&
+             data.name is string && data.name.size() <= 100 &&
+             data.title is string && data.title.size() <= 200 &&
+             (data.get('tagline', '') is string && data.get('tagline', '').size() <= 500) &&
+             (data.get('about', '') is string && data.get('about', '').size() <= 2000) &&
+             (data.get('university', '') is string && data.get('university', '').size() <= 200) &&
+             (data.get('careerGoals', '') is string && data.get('careerGoals', '').size() <= 1000) &&
+             (data.get('profileImage', '') is string && data.get('profileImage', '').size() <= 1000);
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll(['title', 'description', 'imageUrl']) &&
+             data.title is string && data.title.size() <= 200 &&
+             data.description is string && data.description.size() <= 2000 &&
+             data.imageUrl is string && data.imageUrl.size() <= 1000 &&
+             (data.get('tools', []) is list) &&
+             (data.get('link', '') is string && data.get('link', '').size() <= 1000);
+    }
+
+    function isValidAchievement(data) {
+      return data.keys().hasAll(['title', 'date']) &&
+             data.title is string && data.title.size() <= 200 &&
+             data.date is string && data.date.size() <= 100 &&
+             (data.get('description', '') is string && data.get('description', '').size() <= 1000) &&
+             (data.get('imageUrl', '') is string && data.get('imageUrl', '').size() <= 1000);
+    }
+
+    // --- Rules ---
+
+    // Public Read Access for landing page data
+    match /profile/{profileId} {
+      allow get, list: if true;
+      allow create, update: if isAdmin() && isValidProfile(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /projects/{projectId} {
+      allow get, list: if true;
+      allow create: if isAdmin() && isValidProject(request.resource.data) && request.resource.data.createdAt == request.time;
+      allow update: if isAdmin() && isValidProject(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /achievements/{achievementId} {
+      allow get, list: if true;
+      allow create: if isAdmin() && isValidAchievement(request.resource.data) && request.resource.data.createdAt == request.time;
+      allow update: if isAdmin() && isValidAchievement(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /messages/{messageId} {
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'message']) &&
+                      request.resource.data.name is string && request.resource.data.name.size() <= 100 &&
+                      request.resource.data.email is string && request.resource.data.email.size() <= 200 &&
+                      request.resource.data.message is string && request.resource.data.message.size() <= 2000 &&
+                      request.resource.data.createdAt == request.time;
+      allow get, list, delete: if isAdmin();
+    }
+
+    // Admin Bootstrap & Management
+    match /admins/{uid} {
+      allow get: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      // Self-bootstrap rule for the master email
+      allow create: if isEmailVerified() && 
+                      request.auth.uid == uid && 
+                      request.auth.token.email == 'ashishgill2929@gmail.com' &&
+                      request.resource.data.keys().hasOnly(['email']) &&
+                      request.resource.data.email == request.auth.token.email;
+      allow delete: if isAdmin() && uid != request.auth.uid; // Admins can manage other admins, but not delete themselves to prevent lockout (logic)
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "entities": {
+    "Profile": {
+      "title": "User Profile",
+      "description": "Public profile information for the portfolio owner.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "tagline": { "type": "string" },
+        "about": { "type": "string" },
+        "university": { "type": "string" },
+        "careerGoals": { "type": "string" },
+        "profileImage": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "title"]
+    },
+    "Project": {
+      "title": "Portfolio Project",
+      "description": "A project featured in the portfolio.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "tools": { "type": "array", "items": { "type": "string" } },
+        "imageUrl": { "type": "string" },
+        "link": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "imageUrl"]
+    },
+    "Achievement": {
+      "title": "Achievement",
+      "description": "Awards and certificates.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "date"]
+    },
+    "Admin": {
+      "title": "Admin User",
+      "description": "Users with administrative privileges.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" }
+      },
+      "required": ["email"]
+    },
+    "ContactMessage": {
+      "title": "Contact Message",
+      "description": "Messages sent from the contact form.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "message"]
+    }
+  },
+  "firestore": {
+    "profile": {
+      "schema": "Profile",
+      "description": "Collection containing the single profile document."
+    },
+    "projects": {
+      "schema": "Project",
+      "description": "Collection of portfolio projects."
+    },
+    "achievements": {
+      "schema": "Achievement",
+      "description": "Collection of awards and achievements."
+    },
+    "admins": {
+      "schema": "Admin",
+      "description": "Collection of authorized admin UIDs."
+    },
+    "messages": {
+      "schema": "ContactMessage",
+      "description": "Collection of contact form submissions."
+    }
+  }
+}
